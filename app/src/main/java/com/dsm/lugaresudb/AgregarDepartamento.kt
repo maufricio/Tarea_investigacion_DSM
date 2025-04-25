@@ -12,12 +12,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import android.net.Uri
+import android.util.Log
+import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.Toast
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.dsm.lugaresudb.datos.Departamento
 import com.dsm.lugaresudb.datos.RepositorioDepartamentos
 import com.google.firebase.storage.FirebaseStorage
+import com.squareup.picasso.Picasso
 import java.util.UUID
 
 
@@ -67,15 +72,24 @@ fun AgregarDepartamentoScreen(navController: NavController) {
             Text("Seleccionar imagen")
         }
 
-        imagenUri?.let {
-            Image(
-                painter = rememberAsyncImagePainter(it),
-                contentDescription = null,
+        imagenUri?.let { uri ->
+            AndroidView(
+                factory = { context ->
+                    ImageView(context).apply {
+                        scaleType = ImageView.ScaleType.CENTER_CROP
+                        layoutParams = ViewGroup.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            600 // Alto deseado en px
+                        )
+                        Picasso.get().load(uri).into(this)
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp)
             )
         }
+
 
         Button(
             onClick = {
@@ -109,8 +123,10 @@ fun AgregarDepartamentoScreen(navController: NavController) {
                             )
                         }
                     }
-                    .addOnFailureListener {
-                        mensaje = "Error al subir imagen: ${it.message}"
+                    .addOnFailureListener { exception ->
+                            mensaje = "Error al subir imagen: ${exception.message}"
+                            Log.e("FirebaseStorage", "Fallo al subir", exception)
+
                     }
             },
             modifier = Modifier.fillMaxWidth()
