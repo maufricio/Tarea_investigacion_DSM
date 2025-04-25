@@ -50,8 +50,44 @@ fun ListaDepartamentosScreen(navController: NavController, viewModel: Departamen
                     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
+
+                        // 👇 Mostrar la imagen desde URL con la extensión de Picasso
+                        if (departamento.imagenUrl.isNotEmpty()) {
+                            PicassoImage(
+                                url = departamento.imagenUrl,
+                                contentDescription = "Imagen del departamento",
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(250.dp)
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
                         Text(text = "Nombre: ${departamento.nombre}", style = MaterialTheme.typography.titleMedium)
                         Text(text = "Descripción: ${departamento.descripcion}", style = MaterialTheme.typography.bodyMedium)
+                        Text(text = "Servicios: ${departamento.servicios}", style = MaterialTheme.typography.bodyMedium)
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 8.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            // Botón Eliminar (rojo)
+                            Button(
+                                onClick = { /* TODO: lógica para eliminar */ },
+                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                            ) {
+                                Text("Eliminar")
+                            }
+
+                            // Botón Editar (amarillo)
+                            Button(
+                                onClick = { /* TODO: lógica para editar */ },
+                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
+                            ) {
+                                Text("Editar")
+                            }
+                        }
                     }
                 }
             }

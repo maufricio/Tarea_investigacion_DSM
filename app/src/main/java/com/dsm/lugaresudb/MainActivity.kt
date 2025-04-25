@@ -54,7 +54,6 @@ fun MainScreen(navController: NavController) {
         }
     }
 }
-
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
