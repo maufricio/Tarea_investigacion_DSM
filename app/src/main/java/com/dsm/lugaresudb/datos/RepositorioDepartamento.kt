@@ -19,4 +19,22 @@ object RepositorioDepartamentos {
                 onError(e)
             }
     }
+
+
+    fun obtenerDepartamentos(
+        onSuccess: (List<Departamento>) -> Unit,
+        onError: (Exception) -> Unit
+    ) {
+        val db = FirebaseFirestore.getInstance()
+
+        db.collection("departamentos")
+            .get()
+            .addOnSuccessListener { result ->
+                val departamentos = result.mapNotNull { it.toObject(Departamento::class.java) }
+                onSuccess(departamentos)
+            }
+            .addOnFailureListener { exception ->
+                onError(exception)
+            }
+    }
 }

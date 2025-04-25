@@ -47,9 +47,9 @@ fun MainScreen(navController: NavController) {
             }
 
             androidx.compose.material3.Button(onClick = {
-                // ejemplo para otro destino
+                navController.navigate("listar")
             }) {
-                androidx.compose.material3.Text("Otro botón")
+                androidx.compose.material3.Text("Ver Lista de Departamentos")
             }
         }
     }
@@ -61,5 +61,6 @@ fun AppNavigation() {
     NavHost(navController = navController, startDestination = "main") {
         composable("main") { MainScreen(navController) }
         composable("agregar") { AgregarDepartamentoScreen(navController) }
+        composable("listar") { ListaDepartamentosScreen(navController) }
     }
 }
