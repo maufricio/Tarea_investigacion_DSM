@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "327684088347",
+    "project_id": "lugaresudb",
+    "storage_bucket": "lugaresudb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:327684088347:android:7d4838198a6b65b8ab4ebe",
+        "android_client_info": {
+          "package_name": "com.dsm.lugaresudb"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCUzdChMLJIP9ylTF85nMumtFTp8aWpz7s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
