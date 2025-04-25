@@ -21,8 +21,15 @@ import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.dsm.lugaresudb.datos.Departamento
 import com.dsm.lugaresudb.datos.RepositorioDepartamentos
+import com.dsm.lugaresudb.datos.RetrofitClient
 import com.google.firebase.storage.FirebaseStorage
 import com.squareup.picasso.Picasso
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.util.UUID
 
 
@@ -39,6 +46,7 @@ fun AgregarDepartamentoScreen(navController: NavController) {
     ) { uri: Uri? ->
         imagenUri = uri
     }
+
     Column(
         modifier = Modifier
             .padding(16.dp)
@@ -72,24 +80,15 @@ fun AgregarDepartamentoScreen(navController: NavController) {
             Text("Seleccionar imagen")
         }
 
-        imagenUri?.let { uri ->
-            AndroidView(
-                factory = { context ->
-                    ImageView(context).apply {
-                        scaleType = ImageView.ScaleType.CENTER_CROP
-                        layoutParams = ViewGroup.LayoutParams(
-                            ViewGroup.LayoutParams.MATCH_PARENT,
-                            600 // Alto deseado en px
-                        )
-                        Picasso.get().load(uri).into(this)
-                    }
-                },
+        imagenUri?.let {
+            Image(
+                painter = rememberAsyncImagePainter(it),
+                contentDescription = null,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp)
             )
         }
-
 
         Button(
             onClick = {
@@ -98,18 +97,25 @@ fun AgregarDepartamentoScreen(navController: NavController) {
                     return@Button
                 }
 
-                val storageRef = FirebaseStorage.getInstance().reference
-                val nombreImagen = UUID.randomUUID().toString()
-                val imagenRef = storageRef.child("departamentos/$nombreImagen.jpg")
+                val contentResolver = context.contentResolver
+                val stream = contentResolver.openInputStream(imagenUri!!)
+                val requestFile = stream!!.readBytes().toRequestBody("image/*".toMediaTypeOrNull())
+                val body = MultipartBody.Part.createFormData("file", "image.jpg", requestFile)
+                val preset = "departamentos".toRequestBody("text/plain".toMediaTypeOrNull())
 
-                imagenRef.putFile(imagenUri!!)
-                    .addOnSuccessListener {
-                        imagenRef.downloadUrl.addOnSuccessListener { uri ->
+                CoroutineScope(Dispatchers.IO).launch {
+                    try {
+                        val response = RetrofitClient.cloudinaryApi.uploadImage(body, preset)
+                        if (response.isSuccessful) {
+                            val imageUrl = response.body()?.secure_url ?: ""
+                            Log.d("Cloudinary", "Imagen subida: $imageUrl")
+
+                            // Guardar en Firestore o donde necesites
                             val nuevoDepartamento = Departamento(
                                 nombre = nombre,
                                 descripcion = descripcion,
                                 servicios = servicios,
-                                imagenUrl = uri.toString()
+                                imagenUrl = imageUrl
                             )
 
                             RepositorioDepartamentos.guardarDepartamento(
@@ -121,13 +127,13 @@ fun AgregarDepartamentoScreen(navController: NavController) {
                                     mensaje = "Error al guardar: ${it.message}"
                                 }
                             )
+                        } else {
+                            Log.e("Cloudinary", "Error: ${response.errorBody()?.string()}")
                         }
+                    } catch (e: Exception) {
+                        Log.e("Cloudinary", "Excepción al subir: ${e.message}")
                     }
-                    .addOnFailureListener { exception ->
-                            mensaje = "Error al subir imagen: ${exception.message}"
-                            Log.e("FirebaseStorage", "Fallo al subir", exception)
-
-                    }
+                }
             },
             modifier = Modifier.fillMaxWidth()
         ) {
