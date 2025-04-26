@@ -23,11 +23,77 @@ fun ListaDepartamentosScreen(navController: NavController, viewModel: Departamen
     var showDialog by remember { mutableStateOf(false) }
     var departamentoAEliminar by remember { mutableStateOf<Departamento?>(null) }
 
+    var showEditDialog by remember { mutableStateOf(false) }
+    var departamentoAEditar by remember { mutableStateOf<Departamento?>(null) }
 
     // Cargar datos al iniciar
     LaunchedEffect(Unit) {
         viewModel.cargarDepartamentos()
     }
+
+    //Modal para editar
+    if (showEditDialog && departamentoAEditar != null) {
+        var nombre by remember { mutableStateOf(departamentoAEditar!!.nombre) }
+        var descripcion by remember { mutableStateOf(departamentoAEditar!!.descripcion) }
+        var servicios by remember { mutableStateOf(departamentoAEditar!!.servicios) }
+        var imagenUrl by remember { mutableStateOf(departamentoAEditar!!.imagenUrl) }
+
+        AlertDialog(
+            onDismissRequest = { showEditDialog = false },
+            title = { Text("Editar Departamento") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(
+                        value = nombre,
+                        onValueChange = { nombre = it },
+                        label = { Text("Nombre") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    OutlinedTextField(
+                        value = descripcion,
+                        onValueChange = { descripcion = it },
+                        label = { Text("Descripción") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    OutlinedTextField(
+                        value = servicios,
+                        onValueChange = { servicios = it },
+                        label = { Text("Servicios") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    OutlinedTextField(
+                        value = imagenUrl,
+                        onValueChange = { imagenUrl = it },
+                        label = { Text("URL de Imagen") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.actualizarDepartamento(
+                            departamentoAEditar!!.copy(
+                                nombre = nombre,
+                                descripcion = descripcion,
+                                servicios = servicios,
+                                imagenUrl = imagenUrl
+                            )
+                        )
+                        showEditDialog = false
+                    }
+                ) {
+                    Text("Guardar")
+                }
+            },
+            dismissButton = {
+                Button(onClick = { showEditDialog = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+
     //Modal para  eliminar y confirmacion
     if (showDialog && departamentoAEliminar != null) {
         AlertDialog(
@@ -113,7 +179,10 @@ fun ListaDepartamentosScreen(navController: NavController, viewModel: Departamen
 
                             // Botón Editar (amarillo)
                             Button(
-                                onClick = { /* TODO: lógica para editar */ },
+                                onClick = {
+                                    departamentoAEditar = departamento
+                                    showEditDialog = true
+                                },
                                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
                             ) {
                                 Text("Editar")

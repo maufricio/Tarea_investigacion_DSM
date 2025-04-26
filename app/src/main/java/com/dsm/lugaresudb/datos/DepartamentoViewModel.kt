@@ -35,5 +35,24 @@ class DepartamentoViewModel : ViewModel() {
         }
     }
 
-
+    fun actualizarDepartamento(departamentoActualizado: Departamento) {
+        viewModelScope.launch {
+            RepositorioDepartamentos.actualizarDepartamento(
+                departamentoActualizado,
+                onSuccess = {
+                    // Actualiza la lista local después de que se actualice en Firebase
+                    _departamentos.value = _departamentos.value.map { departamento ->
+                        if (departamento.id == departamentoActualizado.id) {
+                            departamentoActualizado
+                        } else {
+                            departamento
+                        }
+                    }
+                },
+                onError = { exception ->
+                    exception.printStackTrace()
+                }
+            )
+        }
+    }
 }

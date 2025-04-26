@@ -64,4 +64,17 @@ object RepositorioDepartamentos {
             }
     }
 
+    fun actualizarDepartamento(
+        departamento: Departamento,
+        onSuccess: () -> Unit,
+        onError: (Exception) -> Unit
+    ) {
+        val db = FirebaseFirestore.getInstance()
+        db.collection("departamentos")
+            .document(departamento.id)
+            .set(departamento)
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { exception -> onError(exception) }
+    }
+
 }
