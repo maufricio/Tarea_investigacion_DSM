@@ -3,6 +3,7 @@ package com.dsm.lugaresudb.datos
 import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
 
+
 object RepositorioDepartamentos {
 
     fun guardarDepartamento(departamento: Departamento, onSuccess: () -> Unit, onError: (Exception) -> Unit) {
@@ -30,11 +31,37 @@ object RepositorioDepartamentos {
         db.collection("departamentos")
             .get()
             .addOnSuccessListener { result ->
-                val departamentos = result.mapNotNull { it.toObject(Departamento::class.java) }
+                val departamentos = result.mapNotNull { doc ->
+                    val departamento = doc.toObject(Departamento::class.java)
+                    departamento.id = doc.id
+                    departamento
+                }
                 onSuccess(departamentos)
             }
             .addOnFailureListener { exception ->
                 onError(exception)
             }
     }
+
+
+    fun eliminarDepartamento(
+        id: String,
+        onSuccess: () -> Unit,
+        onError: (Exception) -> Unit
+    ) {
+        val db = FirebaseFirestore.getInstance()
+
+        db.collection("departamentos")
+            .document(id)
+            .delete()
+            .addOnSuccessListener {
+                Log.d("Firebase", "Departamento eliminado con ID: $id")
+                onSuccess()
+            }
+            .addOnFailureListener { e ->
+                Log.e("Firebase", "Error al eliminar", e)
+                onError(e)
+            }
+    }
+
 }

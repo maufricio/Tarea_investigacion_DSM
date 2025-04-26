@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">LugaresUdb Ejemplo4</string>
+    <string name="Eliminar">Eliminar</string>
+    <string name="Si">Si</string>
+
+
 </resources>

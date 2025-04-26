@@ -12,17 +12,47 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.dsm.lugaresudb.datos.DepartamentoViewModel
+import com.dsm.lugaresudb.datos.Departamento
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListaDepartamentosScreen(navController: NavController, viewModel: DepartamentoViewModel = viewModel()) {
     val departamentos by viewModel.departamentos.collectAsState()
 
+    var showDialog by remember { mutableStateOf(false) }
+    var departamentoAEliminar by remember { mutableStateOf<Departamento?>(null) }
+
+
     // Cargar datos al iniciar
     LaunchedEffect(Unit) {
         viewModel.cargarDepartamentos()
     }
-
+    //Modal para  eliminar y confirmacion
+    if (showDialog && departamentoAEliminar != null) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text("Confirmacion") },
+            text = { Text("¿Esta seguro que desea eliminar este departamento?") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.eliminarDepartamento(departamentoAEliminar!!.id)
+                        showDialog = false
+                    }
+                ) {
+                    Text("Sí")
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = { showDialog = false }
+                ) {
+                    Text("No")
+                }
+            }
+        )
+    }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -51,7 +81,7 @@ fun ListaDepartamentosScreen(navController: NavController, viewModel: Departamen
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
 
-                        // 👇 Mostrar la imagen desde URL con la extensión de Picasso
+                        //  Mostrar la imagen desde URL con la extensión de Picasso
                         if (departamento.imagenUrl.isNotEmpty()) {
                             PicassoImage(
                                 url = departamento.imagenUrl,
@@ -72,9 +102,10 @@ fun ListaDepartamentosScreen(navController: NavController, viewModel: Departamen
                                 .padding(top = 8.dp),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            // Botón Eliminar (rojo)
+                            // Botón Eliminar
                             Button(
-                                onClick = { /* TODO: lógica para eliminar */ },
+                                onClick = { departamentoAEliminar = departamento
+                                    showDialog = true },
                                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                             ) {
                                 Text("Eliminar")
