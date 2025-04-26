@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -33,8 +34,10 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainScreen(navController: NavController) {
     androidx.compose.foundation.layout.Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = androidx.compose.ui.Alignment.Center
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
+        contentAlignment = androidx.compose.ui.Alignment.Center,
     ) {
         androidx.compose.foundation.layout.Column(
             horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
