@@ -1,5 +1,9 @@
 package com.dsm.lugaresudb
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -8,9 +12,11 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
 import com.dsm.lugaresudb.datos.DepartamentoViewModel
 import com.dsm.lugaresudb.datos.Departamento
 
@@ -36,7 +42,14 @@ fun ListaDepartamentosScreen(navController: NavController, viewModel: Departamen
         var nombre by remember { mutableStateOf(departamentoAEditar!!.nombre) }
         var descripcion by remember { mutableStateOf(departamentoAEditar!!.descripcion) }
         var servicios by remember { mutableStateOf(departamentoAEditar!!.servicios) }
-        var imagenUrl by remember { mutableStateOf(departamentoAEditar!!.imagenUrl) }
+        var imagenUri by remember { mutableStateOf(departamentoAEditar!!.imagenUrl) }
+
+        val context = LocalContext.current
+        val launcher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.GetContent()
+        ) { uri: Uri? ->
+            imagenUri = uri.toString()
+        }
 
         AlertDialog(
             onDismissRequest = { showEditDialog = false },
@@ -61,12 +74,22 @@ fun ListaDepartamentosScreen(navController: NavController, viewModel: Departamen
                         label = { Text("Servicios") },
                         modifier = Modifier.fillMaxWidth()
                     )
-                    OutlinedTextField(
-                        value = imagenUrl,
-                        onValueChange = { imagenUrl = it },
-                        label = { Text("URL de Imagen") },
+                    Button(
+                        onClick = { launcher.launch("image/*") },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
                         modifier = Modifier.fillMaxWidth()
-                    )
+                    ) {
+                        Text("Seleccionar imagen")
+                    }
+                    imagenUri?.let {
+                        Image(
+                            painter = rememberAsyncImagePainter(it),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(200.dp)
+                        )
+                    }
                 }
             },
             confirmButton = {
@@ -77,7 +100,7 @@ fun ListaDepartamentosScreen(navController: NavController, viewModel: Departamen
                                 nombre = nombre,
                                 descripcion = descripcion,
                                 servicios = servicios,
-                                imagenUrl = imagenUrl
+                                imagenUrl = imagenUri?.toString() ?: departamentoAEditar!!.imagenUrl
                             )
                         )
                         showEditDialog = false
